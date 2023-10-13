@@ -5,6 +5,7 @@
 #              and each facet of biodiversity, then plots the results.
 #
 ################################################################################
+library(tidyverse)
 
 load(here::here("data", "raw_data", "traits.RData"))
 load(here::here("data", "data", "melted_cov.RData"))
@@ -32,12 +33,8 @@ biom_full = biom_full()
 biom_high = biom_high()
 biom_light = biom_light()
 
-# Some FX plots 
+#  FX plots 
 
-fx_occu_full()
-fx_abun_high()
-fx_biom_full() 
-
-
-
+all_rarity_trophic()
+threeway_interaction()
 

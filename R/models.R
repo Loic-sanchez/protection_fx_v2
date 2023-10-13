@@ -207,10 +207,103 @@ ggplot(interaction_bm_full2, aes(x = Trophic.Level, y = visregFit)) +
 
 all_rarity_trophic = function(){
   
-  all_rarity_trophic = rbind(fx_biom %>% dplyr::select(-c(log_length, log_full)),
+  interaction_occu_high = visreg::visreg(occu_high,
+                                         type = "conditional",
+                                         "Trophic.Level",
+                                         by = "Rarity",
+                                         trans = exp, 
+                                         gg = F,
+                                         nn = 2000)$fit
+  interaction_occu_high$group = "Occurrence"
+  
+  interaction_ab_high = visreg::visreg(abun_high, 
+                                       type = "conditional",
+                                       "Trophic.Level",
+                                       by = "Rarity",
+                                       trans = exp, 
+                                       gg = F,
+                                       nn = 2000)$fit
+  interaction_ab_high$group = "Abundance"
+  
+  
+  interaction_bm_full2 = visreg::visreg(biom_full, 
+                                        type = "conditional",
+                                        "Trophic.Level",
+                                        by = "Rarity",
+                                        trans = exp, 
+                                        gg = F,
+                                        nn = 2000)$fit
+  interaction_bm_full2$group = "Biomass"
+  
+    
+  all_rarity_trophic = rbind(interaction_occu_high %>% dplyr::select(-c(log_high)),
                              interaction_ab_high %>% dplyr::select(-c(log_high)),
                              interaction_bm_full2 %>% dplyr::select(-c(log_length, log_full)))
   
   all_rarity_trophic = all_rarity_trophic %>% 
     mutate(group = fct_relevel(group, "Occurrence", "Abundance", "Biomass"))
+  
+  ggplot(all_rarity_trophic, aes(x = Trophic.Level, y = visregFit, group = group)) +
+    geom_ribbon(aes(ymin = visregLwr, ymax = visregUpr, fill = group), 
+                alpha = 0.75,
+                show.legend = F) +
+    geom_line(linewidth = 1,
+              show.legend = F) +
+    ylab("Effect size of protection") +
+    xlab("Trophic level") +
+    geom_hline(yintercept = 1, linetype = "dashed") +
+    facet_grid(group~Rarity, scales = "free") +
+    theme_minimal() +
+    theme(strip.text = element_text(size = 12, face = "bold"),
+          panel.spacing.x = unit(2.5, "lines"),
+          axis.title.y = element_text(vjust = +2.65, 
+                                      size = 15),
+          axis.title.x = element_text(vjust = -0.75,
+                                      size = 15),
+          axis.text = element_text(size = 12)) +
+    scale_fill_manual(values = c("#00b4d8", "#00b4d8", "#03045e")) +
+    labs(fill = "Type")
+}
+
+threeway_interaction = function(){
+  
+  interaction_bm_high_rare = visreg::visreg(biom_high, 
+                                            type = "conditional",
+                                            "log_length",
+                                            by = "Trophic.Level",
+                                            cond = list(Rarity = "Rare"),
+                                            trans = exp, 
+                                            gg = F,
+                                            nn = 2000)$fit
+  interaction_bm_high_rare$Rarity = "Rare"
+  
+  interaction_bm_high_common = visreg::visreg(biom_high, 
+                                              type = "conditional",
+                                              "log_length",
+                                              by = "Trophic.Level",
+                                              cond = list(Rarity = "Common"),
+                                              trans = exp, 
+                                              gg = F,
+                                              nn = 2000)$fit
+  interaction_bm_high_common$Rarity = "Common"
+  
+  both_bm_high = rbind(interaction_bm_high_common, interaction_bm_high_rare)
+  
+  supp.labs <- c("2" = "Low trophic level","3.3" = "Intermediate trophic level", "4" = "High trophic level")
+  
+  ggplot(both_bm_high, aes(x = log_length, y = visregFit)) +
+    geom_ribbon(aes(ymin = visregLwr, ymax = visregUpr), 
+                alpha = 0.75,
+                fill = "#00b4d8") +
+    geom_line(linewidth = 1) +
+    geom_hline(yintercept = 1, linetype = "dashed") +
+    ylab("Effect size on biomass of medium protection") +
+    xlab("Maximum length (log)") +
+    facet_grid(Rarity ~ Trophic.Level, scales = 'free_y', labeller = labeller(Trophic.Level = supp.labs)) +
+    theme_minimal() +
+    theme(strip.text = element_text(size = 10, face = "bold"),
+          panel.spacing = unit(0.5, "lines"),
+          axis.title.y = element_text(vjust = +3),
+          axis.title.x = element_text(vjust = -0.75))
+
 }

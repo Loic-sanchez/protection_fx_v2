@@ -7,6 +7,8 @@
 #
 ################################################################################
 
+library(tidyverse)
+
 # Source R code
 
 source(here::here("R", "occu_matrix.R"))

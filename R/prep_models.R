@@ -65,6 +65,25 @@ prep_data_bm = function() {
   
   traits$Species = traits$CURRENT_SPECIES_NAME
   
+  df_bm_product = df_bm %>% 
+    left_join(OS_occu %>% 
+                dplyr::select(Species, 
+                              estimate_outside, 
+                              estimate_full, 
+                              estimate_high,
+                              estimate_light, 
+                              AUC), 
+              by = "Species") %>% 
+    rowwise() %>% 
+    mutate(product_full = estimate_full.x*estimate_full.y,
+           product_high = estimate_high.x*estimate_high.y,
+           product_light = estimate_light.x*estimate_light.y,
+           product_outside = estimate_outside.x*estimate_outside.y) %>% 
+    mutate(IRR_product_full = product_full/product_outside,
+           IRR_product_high = product_high/product_outside,
+           IRR_product_light = product_light/product_outside) %>% 
+    drop_na(estimate_outside.y)
+  
   df_bm_traits = df_bm_product %>%
     mutate(log_full = log(IRR_product_full),
            log_high = log(IRR_product_high),
