@@ -21,3 +21,7 @@ source(here::here("R", "effect_sizes.R"))
 OS_occu = compute_ES_occu(x) # Set x = number of cores you're able to use
 df_ab = compute_ES_abun(x)
 df_bm_product = compute_ES_bm(x) # This one needs to have OS_occu computed already !
+
+# Plots
+
+histograms()

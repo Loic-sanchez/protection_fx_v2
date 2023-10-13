@@ -493,3 +493,155 @@ compute_ES_bm = function(x) {
   return(df_product)
   
 })}
+
+histograms = function(){
+  
+  histo_occu = OS_occu %>%
+    rename(High = RR_full,
+           Medium = RR_high, 
+           Low = RR_light) %>% 
+    dplyr::select(Species, Low, Medium, High) %>% 
+    reshape2::melt() %>% 
+    mutate(log_RR = log10(value)) %>% 
+    drop_na(value) %>% 
+    mutate(variable = fct_relevel(variable, c("Low", "Medium", "High")))
+  
+  histoccu = ggplot(histo_occu, aes(y = log_RR, x = variable)) + 
+    geom_jitter(aes(color = variable), 
+                alpha = 0.5,
+                width = 0.175,
+                stroke = 0,
+                size = 4,
+                shape = 16,
+                show.legend = F) + 
+    geom_violin(trim = F,
+                alpha = 0.5,
+                lwd = 0.8,
+                show.legend = F,
+                adjust = 1) +
+    geom_boxplot(outlier.shape = NA,
+                 show.legend = F,
+                 width = 0.3,
+                 alpha = 0,
+                 lwd = 0.8) +
+    geom_hline(yintercept = 0,
+               linetype = 2) +
+    ylim(-1.5, 1.5) +
+    scale_color_manual(values = c("#A0BACC", "#00b4d8", "#03045e")) +
+    xlab("Protection status") +
+    ylab("Effect size of protection") +
+    theme_minimal() +
+    theme(axis.text = element_text(size = 12,
+                                   color = "black"),
+          axis.title = element_text(size = 12))
+  
+  histo_abun = df_ab %>% 
+    dplyr::select(Species, IRR_full, IRR_high, IRR_light) %>%
+    rename(High = IRR_full,
+           Medium = IRR_high, 
+           Low = IRR_light) %>%   
+    reshape2::melt() %>% 
+    mutate(log_RR = log10(value)) %>% 
+    drop_na(value) %>% 
+    mutate(variable = fct_relevel(variable, c("Low", "Medium", "High")))
+  
+  histabun = ggplot(histo_abun, aes(y = log_RR, x = variable)) + 
+    geom_jitter(aes(color = variable), 
+                alpha = 0.5,
+                width = 0.175,
+                stroke = 0,
+                size = 4,
+                shape = 16,
+                show.legend = F) + 
+    geom_violin(trim = F,
+                alpha = 0.5,
+                lwd = 0.8,
+                show.legend = F) +
+    geom_boxplot(outlier.shape = NA,
+                 show.legend = F,
+                 width = 0.3,
+                 alpha = 0,
+                 lwd = 0.8) +
+    geom_hline(yintercept = 0,
+               linetype = 2) +
+    ylim(-1.5, 1.5) +
+    scale_color_manual(values = c("#A0BACC", "#00b4d8", "#03045e")) +
+    xlab("Protection status") +
+    ylab("Effect size of protection") +
+    theme_minimal() +
+    theme(axis.text = element_text(size = 12,
+                                   color = "black"),
+          axis.title = element_text(size = 12))
+  
+  histo_biom = df_bm_product %>% 
+    dplyr::select(Species, IRR_product_full, IRR_product_high, IRR_product_light) %>%
+    rename(High = IRR_product_full,
+           Medium = IRR_product_high, 
+           Low = IRR_product_light) %>%   
+    reshape2::melt() %>% 
+    mutate(log_RR = log10(value)) %>% 
+    drop_na(value) %>% 
+    mutate(variable = fct_relevel(variable, c("Low", "Medium", "High")))
+  
+  # ggplot(histo_biom, aes(x = log_RR, y = variable, fill = stat(x))) + 
+  #   ggridges:: geom_density_ridges_gradient(scale = 2, size = 1) +
+  #   scale_fill_viridis_c(name = "log_RR", option = "C") + 
+  #   theme_minimal()
+  
+  histbiom = ggplot(histo_biom, aes(y = log_RR, x = variable)) + 
+    geom_jitter(aes(color = variable),
+                show.legend = F,
+                alpha = 0.5,
+                width = 0.175,
+                stroke = 0,
+                size = 4,
+                shape = 16) + 
+    geom_violin(trim = F,
+                alpha = 0.5,
+                lwd = 0.8,
+                show.legend = F) +
+    geom_boxplot(outlier.shape = NA,
+                 show.legend = F,
+                 width = 0.3,
+                 alpha = 0,
+                 lwd = 0.8) +
+    geom_hline(yintercept = 0,
+               linetype = 2) +
+    ylim(-1.5, 1.5) +
+    scale_color_manual(values = c("#A0BACC", "#00b4d8", "#03045e")) +
+    xlab("Protection status") +
+    ylab("Effect size of protection") +
+    theme_minimal() +
+    theme(axis.text = element_text(size = 12,
+                                   color = "black"),
+          axis.title = element_text(size = 12))
+  
+  histoccu3 = histoccu + coord_flip() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text = element_text(size = 10),
+          axis.title.y = element_text(vjust = +2.5,
+                                      size = 14)) +
+    scale_x_discrete(limits = rev) +
+    xlab(" ")
+  
+  histabun3 = histabun + coord_flip() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.title.y = element_text(vjust = +2.5,
+                                      size = 14),
+          axis.text = element_text(size = 10)) +
+    scale_x_discrete(limits = rev) 
+  
+  histbiom3 = histbiom + coord_flip() +
+    theme(axis.text = element_text(size = 10),
+          axis.title.x = element_text(size = 14),
+          axis.title.y = element_text(vjust = +2.5,
+                                      size = 14)) +
+    scale_x_discrete(limits = rev) +
+    xlab(" ")
+  
+  boxplots_vertical = cowplot::plot_grid(histoccu3, histabun3, histbiom3, ncol = 1)
+  boxplots_vertical
+}
+
